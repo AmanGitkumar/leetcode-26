@@ -1,39 +1,48 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
-int mod = 1e9 + 7;
-int bfs(vector<vector<int>>&adj,int n, int k){
-        int cnt = 0;
-        queue<pair<int,int>>q;
-        
-        q.push({1,0});
-        
-        while(!q.empty()){
-            auto x = q.front();
-            q.pop();
-            int node = x.first;
-            int steps = x.second;
-            if(steps == k){
 
-                if(node == n){
-                    cnt = (cnt + 1)%mod;
-                }
-                continue;
-            }
-            for(int x2 : adj[node]){                 
-                    q.push({x2,steps+1});
+static const long long MOD = 1e9 + 7;
+int n;
+
+using Matrix = vector<vector<long long>>;
+
+Matrix multiply(const Matrix &a, const Matrix &b) {
+    Matrix c(n, vector<long long>(n, 0));
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < n; k++) {
+            if (a[i][k] == 0) continue;
+            for (int j = 0; j < n; j++) {
+                c[i][j] = (c[i][j] + a[i][k] * b[k][j]) % MOD;
             }
         }
-    return cnt;
-}
-int main(){
-    int n,m,k;
-    cin >> n >> m >> k;
-    vector<vector<int>> adj(n+1);
-    for(int i = 0; i < m; i++){
-        int a,b;
-        cin >> a >> b;
-        adj[a].push_back(b);
     }
-    cout << bfs(adj,n,k) << endl;
-    
+    return c;
+}
+
+Matrix matrix_power(Matrix base, long long exp) {
+    Matrix result(n, vector<long long>(n, 0));
+    for (int i = 0; i < n; i++) result[i][i] = 1;
+
+    while (exp) {
+        if (exp & 1) result = multiply(result, base);
+        base = multiply(base, base);
+        exp >>= 1;
+    }
+    return result;
+}
+
+int main() {
+    int m;
+    long long k;
+    cin >> n >> m >> k;
+
+    Matrix adj(n, vector<long long>(n, 0));
+    for (int i = 0; i < m; i++) {
+        int a, b;
+        cin >> a >> b;
+        adj[a - 1][b - 1]++;
+    }
+
+    Matrix res = matrix_power(adj, k);
+    cout << res[0][n - 1] << "\n";
 }
